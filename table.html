@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>mailConfig</title>
+    <script src="https://cdn.staticfile.org/angular.js/1.4.6/angular.min.js"></script>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.staticfile.org/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div ng-app="myApp" ng-controller="myCtrl">
+    <div>
+        <label>数据最后更新日期:</label>{{now|date:'yyyy-MM-dd'}}
+    </div>
+    <div class="col-lg-12">
+        <div class="col-lg-4"><label class="control-label">邮件编码</label><input type="text" class="form-control"></div>
+        <div class="col-lg-4"><label class="control-label">邮件名称</label><input type="text" class="form-control"></div>
+    </div>
+    <div class="col-lg-12">
+        <div class="col-lg-4"><label class="control-label">收件人</label><select class="form-control">
+            <option value="">请选择</option>
+        </select></div>
+        <div class="col-lg-4"><label class="control-label">发送时间</label><input type="text" class="form-control"></div>
+        <div class="col-lg-4"><label class="control-label">发送频次</label>
+            <select class="form-control">
+                <option>请选择</option>
+                <option>一天一次</option>
+                <option>一周一次</option>
+                <option>一月一次</option>
+            </select>
+        </div>
+    </div>
+    <br>
+    <div>
+        <label>数据源配置</label>
+        <button class="btn btn-primary" style="height:29px;" ng-click="addConfig()">增加</button>
+    </div>
+    <div ng-show="configShow">
+        <div class="col-lg-12">
+            <div class="col-lg-6">
+                <label class="control-label">shark源</label><input type="text" class="form-control">
+            </div>
+            <div class="col-lg-6">
+                <label class="control-label">筛选条件</label>
+                <select class="form-control">
+                    <option value="">请选择</option>
+                    <option value="">大于</option>
+                    <option value="">小于</option>
+                    <option value="">大于等于</option>
+                    <option value="">小于等于</option>
+                    <option value="">不等于</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="col-lg-6">
+                <label class="control-label">汇总列</label><input type="text" class="form-control">
+            </div>
+            <div class="col-lg-6">
+                <label class="control-label">输出列</label><input type="text" class="form-control">
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="col-lg-8">
+            <select class="form-control" ng-model="style" ng-change="styleChange()">
+                <option value="">请选择</option>
+                <option value="表格">表格</option>
+                <option value="折线">折线</option>
+                <option value="柱状图">柱状图</option>
+            </select>
+        </div>
+        <div class="col-lg-4">
+            <button class="btn btn-primary" ng-click="addStyle()">增加</button>
+        </div>
+    </div>
+
+    <!--模态框-->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel">
+                        创建表格
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <label>请输入行数</label><input type="text" class="form-control" ng-model="rows">
+                    <label>请输入列数</label><input type="text" class="form-control" ng-model="cols">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭
+                    </button>
+                    <button type="button" class="btn btn-primary" ng-click="createTable()">
+                        确定
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--创建表格-->
+    <table border="1" cellpadding="5" cellspacing="0" id="tab" contenteditable="true" width="70%"></table>
+    <ul id="ul">
+        <li id="first_li">
+            <div class="col-lg-12" ng-show="picShow" id="pic">
+                <div class="col-lg-6">
+                    <img src="./1.jpg" alt="" width="500px" height="500px">
+                </div>
+                <div class="col-lg-6">
+                    <label class="control-label">请输入折线图名称</label><input type="text" class="form-control">
+                    <label class="control-label">数据源</label><input type="text" class="form-control">
+                    <label class="control-label">横坐标字段</label><input type="text" class="form-control">
+                    <label class="control-label">纵坐标字段</label><input type="text" class="form-control">
+                    <button class="btn btn-primary" style="float:right;" ng-click="deleteStyle('first_li')">删除</button>
+                </div>
+            </div>
+        </li>
+    </ul>
+    <!--富媒体-->
+    <div><label>富媒体编辑器</label>
+        <div contenteditable="true" style="border:1px solid black;width:500px;height:300px;overflow: auto;" >
+            <p>你好，这是    的数据报表，日期 年 月 日</p>
+            <input tupe="text" id="input">
+            <p>请查收，good luck</p>
+        </div>
+        <span>
+            <button class="btn btn-primary" ng-click="Look()">预览</button>
+            <button class="btn btn-primary">保存</button>
+        </span>
+    </div>
+
+    <!--预览框-->
+    <div class="modal fade" id="Modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel">
+        <div class="modal-dialog">
+            <div class="modal-content" style="width:900px;height:700px;">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+                        &times;
+                    </button>
+                    <h4 class="modal-title" id="ModalLabel">
+                    </h4>
+                </div>
+                <div class="modal-body" id="look_config">
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    let app = angular.module('myApp', []);
+    app.controller('myCtrl', function ($scope, $interval) {
+        $interval(function () {
+            $scope.now = new Date();
+        }, 1000);
+        $scope.addConfig = function () {
+            $scope.configShow = true;
+        }
+
+        $scope.styleChange = function () {
+            if ($scope.style === "表格") {
+                $('#myModal').modal('show')
+                $scope.createTable = function () {
+                    $('#myModal').modal('hide');
+                    let tab = document.getElementById("tab");
+                    for (let i = 0; i < $scope.rows; i++) {
+                        let tr = document.createElement("tr");
+                        for (let j = 0; j < $scope.cols; j++) {
+                            let td = document.createElement("td");
+                            td.innerHTML = "";
+                            tr.appendChild(td);
+                        }
+                        tab.appendChild(tr);
+                    }
+
+                }
+            }
+            if ($scope.style === "折线") {
+                $('#myModal').modal('hide');
+                $scope.picShow = true;
+                $scope.addStyle = function () {
+                    pic = "./1.jpg";
+                    let li = createList(pic);
+                    var ul = document.getElementById("ul");
+                    ul.appendChild(li);
+
+
+                };
+                //删除增加的样式
+                $scope.deleteStyle=function(id){
+                    var li_id=document.getElementById(id);
+                    li_id.remove();
+
+                };
+
+                //工厂模式
+                var createList = function (pic) {
+                    let li = document.createElement("li");
+                    let id=Math.random().toString();
+                    li.setAttribute("id",id);
+                    let div1 = document.createElement("div");
+                    let div2 = document.createElement("div");
+                    let div3 = document.createElement("div");
+                    let img = document.createElement("img");
+                    let label1 = document.createElement("label");
+                    let label2 = document.createElement("label");
+                    let label3 = document.createElement("label");
+                    let label4 = document.createElement("label");
+                    let input1 = document.createElement("input");
+                    let input2 = document.createElement("input");
+                    let input3 = document.createElement("input");
+                    let input4 = document.createElement("input");
+                    let button=document.createElement("button");
+                    div1.setAttribute("class", "col-lg-12");
+                    div2.setAttribute("class", "col-lg-6");
+                    img.setAttribute("src", pic);
+                    div3.setAttribute("class", "col-lg-6");
+                    label1.setAttribute("class", "control-label");
+                    label2.setAttribute("class", "control-label");
+                    label3.setAttribute("class", "control-label");
+                    label4.setAttribute("class", "control-label");
+                    input1.setAttribute("class", "form-control");
+                    input2.setAttribute("class", "form-control");
+                    input3.setAttribute("class", "form-control");
+                    input4.setAttribute("class", "form-control");
+                    input1.setAttribute("type", "text");
+                    input2.setAttribute("type", "text");
+                    input3.setAttribute("type", "text");
+                    input4.setAttribute("type", "text");
+                    button.setAttribute("class","btn btn-primary");
+                    button.setAttribute("style","float:right");
+                   button.onclick=function(){
+                       var li_id=document.getElementById(id);
+                       li_id.remove();
+                   }
+                    label1.innerHTML = "请输入折线图名称";
+                    label2.innerHTML = "数据源";
+                    label3.innerHTML = "横坐标字段";
+                    label4.innerHTML = "纵坐标字段";
+                    button.innerHTML="删除";
+                    img.width = 500;
+                    img.height = 500;
+                    div3.appendChild(label1);
+                    div3.appendChild(input1);
+                    div3.appendChild(label2);
+                    div3.appendChild(input2);
+                    div3.appendChild(label3);
+                    div3.appendChild(input3);
+                    div3.appendChild( label4);
+                    div3.appendChild(input4);
+                    div3.appendChild(button);
+                    div2.appendChild(img);
+                    div1.appendChild(div2);
+                    div1.appendChild(div3);
+                    li.appendChild(div1);
+                    return li;
+                }
+            }
+
+        };
+
+        //哈希表
+        var Look_obj={
+            '$表格':"tab",
+            '$条形图1':"pic",
+        };
+        $scope.Look=function(){
+            let dollar=document.getElementById("input").value;
+            let show_id=Look_obj[dollar];
+            let show=document.getElementById(show_id);
+            let look_config=document.getElementById("look_config");
+            // look_config.appendChild(show);
+            $('#Modal').modal('show');
+
+
+
+
+        }
+
+
+    });
+
+
+</script>
+
+</body>
+</html>
